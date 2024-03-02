@@ -27,7 +27,7 @@ jobs:
         path: |
           turnip_workdir/ninja_log
           turnip_workdir/mesa/build-android-aarch64/meson-logs/meson-log.txt
-          turnip_workdir/turnip.zip
+          turnip_workdir/turnip_${{ steps.versions3.outputs.tag }}.zip
     
     - id: versions1
       run: echo "description=$(cat turnip_workdir/description)" >> "$GITHUB_OUTPUT"
