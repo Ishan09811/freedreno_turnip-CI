@@ -170,8 +170,6 @@ EOF
 	echo "https://gitlab.freedesktop.org/mesa/mesa/-/commit/$commit" > description
 	echo "Turnip Driver - $mesa_version - $commit_short" > release
 	echo "$mesa_version"_"$commit_short" > tag
-        artifact_path="$workdir/turnip_$mesa_version_$commit_short.zip"
-        echo "::set-output name=artifact_path::$artifact_path"
 
 	if ! [ -a "$workdir"/turnip_"$mesa_version"_"$commit_short".zip ];
 		then echo -e "$red-Packing failed!$nocolor" && exit 1
