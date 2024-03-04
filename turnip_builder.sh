@@ -12,7 +12,7 @@ mesasrc="https://gitlab.freedesktop.org/mesa/mesa.git"
 
 #array of string => commit/branch;patch args
 #inverted color fix for some game on a7xx, 8gen3 fix
-patches=( "commit/9de628b65ca36b920dc6181251b33c436cad1b68;--reverse" "merge_requests/27912;")
+patches=( "commit/9de628b65ca36b920dc6181251b33c436cad1b68;--reverse" "merge_requests/27912;" "merge_requests/27847;")
 #patches=()
 #old 
 #patches=('commit/9de628b65ca36b920dc6181251b33c436cad1b68;--reverse')
