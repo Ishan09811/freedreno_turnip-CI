@@ -11,7 +11,7 @@ sdkver="31"
 mesasrc="https://gitlab.freedesktop.org/mesa/mesa.git"
 
 
-patches=("merge_requests/27847;" "merge_requests/28109;" "merge_requests/28148;" "merge_requests/28210;" "merge_requests/28249;" "commit/1ba6ccc51a4483a6d622c91fc43685150922dcdf;--reverse")
+patches=("merge_requests/27847;" "merge_requests/28109;" "merge_requests/28148;" "merge_requests/28210;" "merge_requests/28249;")
 commit=""
 commit_short=""
 mesa_version=""
