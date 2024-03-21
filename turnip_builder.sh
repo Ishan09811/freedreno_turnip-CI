@@ -10,12 +10,8 @@ ndkver="android-ndk-r26c"
 sdkver="31"
 mesasrc="https://gitlab.freedesktop.org/mesa/mesa.git"
 
-#array of string => commit/branch;patch args
-#inverted color fix for some game on a7xx, 8gen3 fix
+
 patches=("merge_requests/27847;" "merge_requests/28109;" "merge_requests/28148;" "merge_requests/28210;" "merge_requests/28249;" "commit/1ba6ccc51a4483a6d622c91fc43685150922dcdf;--reverse")
-#patches=()
-#old 
-#patches=('commit/9de628b65ca36b920dc6181251b33c436cad1b68;--reverse')
 commit=""
 commit_short=""
 mesa_version=""
