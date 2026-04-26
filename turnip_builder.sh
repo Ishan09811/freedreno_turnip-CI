@@ -120,7 +120,7 @@ ar = '$ndk_bin/llvm-ar'
 c = ['$ndk_bin/aarch64-linux-android$sdkver-clang']
 cpp = ['$ndk_bin/aarch64-linux-android$sdkver-clang++', '-fno-exceptions', '-fno-unwind-tables', '-fno-asynchronous-unwind-tables', '-static-libstdc++']
 strip = '$ndk_bin/llvm-strip'
-pkgconfig = '/usr/bin/pkg-config'
+pkgconfig = ['env', 'PKG_CONFIG_LIBDIR=NDKDIR/pkgconfig', '/usr/bin/pkg-config']
 
 [built-in options]
 c_link_args = ['-fuse-ld=lld']
