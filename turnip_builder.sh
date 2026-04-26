@@ -27,6 +27,8 @@ check_deps(){
 	sudo apt remove meson -y &>/dev/null || true
 	pip install meson
 
+	sudo apt install -y libssl-dev
+
 	echo "Checking system for required Dependencies ..."
 	for deps_chk in $deps;
 		do
