@@ -90,25 +90,15 @@ prepare_workdir(){
 	echo "Cloning latest mesa main branch ..." $'\n'
 	git clone --depth=1 "$mesasrc" &> /dev/null
 	cd mesa
-
-	sed -i 's/\.size = entry.size \/ sizeof(uint32_t)/.size = static_cast<uint16_t>(entry.size \/ sizeof(uint32_t))/g' src/freedreno/vulkan/tu_cs.h
-    sed -i 's/\.size = size/.size = static_cast<uint16_t>(size)/g' src/freedreno/vulkan/tu_cs.h
-
-	#echo "Updating internal Vulkan headers to latest Khronos spec..."
-	#git clone --depth=1 https://github.com/KhronosGroup/Vulkan-Headers.git vk_headers_temp &> /dev/null
-	#cp -rf vk_headers_temp/include/vulkan/* include/vulkan/
-	#rm -rf vk_headers_temp
-	#echo -e "$green- Vulkan headers updated successfully. $nocolor"
 	
 	commit_short=$(git rev-parse --short HEAD)
 	commit=$(git rev-parse HEAD)
 	mesa_version=$(cat VERSION | xargs)
 	
-	# Extract version from updated headers
-	v_header="include/vulkan/vulkan_core.h"
-	major=$(grep "#define VK_API_VERSION_MAJOR" $v_header | awk '{print $3}')
-	minor=$(grep "#define VK_API_VERSION_MINOR" $v_header | awk '{print $3}')
-	patch=$(grep "#define VK_HEADER_VERSION " $v_header | head -n 1 | awk '{print $3}')
+	version=$(awk -F'COMPLETE VK_MAKE_API_VERSION(|)' '{print $2}' <<< $(cat include/vulkan/vulkan_core.h) | xargs)
+	major=$(echo $version | cut -d "," -f 2 | xargs)
+	minor=$(echo $version | cut -d "," -f 3 | xargs)
+	patch=$(awk -F'VK_HEADER_VERSION |\n#define' '{print $2}' <<< $(cat include/vulkan/vulkan_core.h) | xargs)
 	vulkan_version="$major.$minor.$patch"
 }
 
