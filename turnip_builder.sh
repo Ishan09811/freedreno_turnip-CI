@@ -140,7 +140,6 @@ EOF
 	echo "Generating build files ..." $'\n'
 	meson setup build-android-aarch64 \
 		--cross-file "$(pwd)/android-aarch64" \
-		--wrap-mode=nodownload \
 		-Dbuildtype=release \
 		-Dplatforms=android \
 		-Dplatform-sdk-version=$sdkver \
@@ -150,8 +149,7 @@ EOF
 		-Dvulkan-beta=true \
 		-Dfreedreno-kmds=kgsl \
 		-Db_lto=false \
-		-Degl=disabled \
-		-Dtools=
+		-Degl=disabled
 
 	echo "Compiling build files ..." $'\n'
 	ninja -C build-android-aarch64 src/freedreno/vulkan/libvulkan_freedreno.so
