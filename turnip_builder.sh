@@ -91,6 +91,9 @@ prepare_workdir(){
 	git clone --depth=1 "$mesasrc" &> /dev/null
 	cd mesa
 
+	sed -i 's/\.size = entry.size \/ sizeof(uint32_t)/.size = static_cast<uint16_t>(entry.size \/ sizeof(uint32_t))/g' src/freedreno/vulkan/tu_cs.h
+    sed -i 's/\.size = size/.size = static_cast<uint16_t>(size)/g' src/freedreno/vulkan/tu_cs.h
+
 	#echo "Updating internal Vulkan headers to latest Khronos spec..."
 	#git clone --depth=1 https://github.com/KhronosGroup/Vulkan-Headers.git vk_headers_temp &> /dev/null
 	#cp -rf vk_headers_temp/include/vulkan/* include/vulkan/
