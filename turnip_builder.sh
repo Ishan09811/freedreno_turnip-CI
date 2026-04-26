@@ -46,15 +46,21 @@ check_deps(){
 	echo "Installing python dependencies (mako, pyyaml) ..." $'\n'
 	pip install mako pyyaml &> /dev/null
 
-	echo "Downloading latest glslangValidator for Mesa main..."
+	echo "Downloading modern glslangValidator for Mesa main..."
     mkdir -p "$workdir/bin"
+    cd "$workdir"
     curl -L https://github.com/KhronosGroup/glslang/releases/download/master-tot/glslang-master-linux-x64-Release.zip -o glslang.zip &> /dev/null
-    unzip -oj glslang.zip bin/glslangValidator -d "$workdir/bin" &> /dev/null
-    chmod +x "$workdir/bin/glslangValidator"
-    rm glslang.zip
     
+    unzip -o glslang.zip -d glslang_temp &> /dev/null
+    find glslang_temp -name "glslangValidator" -type f -exec cp {} "$workdir/bin/" \;
+    
+    chmod +x "$workdir/bin/glslangValidator"
+    rm -rf glslang.zip glslang_temp
     export PATH="$workdir/bin:$PATH"
-    echo -e "$green - glslangValidator updated to $(glslangValidator -v | head -n 1) $nocolor"
+    
+    CURRENT_GLSLANG=$(glslangValidator -v | head -n 1)
+    echo -e "$green - glslangValidator updated to: $CURRENT_GLSLANG $nocolor"
+    cd ..
 }
 
 prepare_workdir(){
