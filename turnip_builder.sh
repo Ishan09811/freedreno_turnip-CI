@@ -158,13 +158,18 @@ EOF
 }
 
 port_lib_for_magisk(){
-	echo "Checking if compilation was successful..." $'\n'
-	compiled_lib="$workdir/mesa/build-android-aarch64/src/freedreno/vulkan/libvulkan_freedreno.so"
-	
-	if [ ! -f "$compiled_lib" ]; then
-		echo -e "$red- Build failed! libvulkan_freedreno.so not found. Check the ninja output above. $nocolor"
-		exit 1
-	fi
+	echo "Locating compiled driver..." $'\n'
+    
+    compiled_lib=$(find "$workdir/mesa/build-android-aarch64" -name "libvulkan_freedreno.so" -type f | head -n 1)
+    
+    if [ -z "$compiled_lib" ] || [ ! -f "$compiled_lib" ]; then
+        echo -e "$red- Build failed! libvulkan_freedreno.so not found in build directory. $nocolor"
+        # Debug: List the contents of the vulkan output folder to see what WAS built
+        ls -R "$workdir/mesa/build-android-aarch64/src/freedreno/vulkan/"
+        exit 1
+    fi
+
+    echo -e "$green- Found driver at: $compiled_lib $nocolor"
 
 	echo "Using patchelf to match soname ..."  $'\n'
 	cp "$compiled_lib" "$workdir"
