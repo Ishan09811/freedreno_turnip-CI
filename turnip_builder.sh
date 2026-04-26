@@ -17,8 +17,8 @@ vulkan_version=""
 clear
 
 run_all(){
-	check_deps
 	prepare_workdir
+	check_deps
 	build_lib_for_android
 	port_lib_for_magisk
 }
