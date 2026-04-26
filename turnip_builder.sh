@@ -6,12 +6,12 @@ nocolor='\033[0m'
 deps="meson ninja patchelf unzip curl pip flex bison zip git"
 workdir="$(pwd)/turnip_workdir"
 magiskdir="$workdir/turnip_module"
-ndkver="android-ndk-r26c"
-sdkver="31"
+ndkver="android-ndk-r29c"
+sdkver="35"
 mesasrc="https://gitlab.freedesktop.org/mesa/mesa.git"
 
 
-patches=("merge_requests/27847;" "merge_requests/28109;" "merge_requests/28148;" "merge_requests/28210;")
+patches=()
 commit=""
 commit_short=""
 mesa_version=""
