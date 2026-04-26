@@ -45,6 +45,16 @@ check_deps(){
 
 	echo "Installing python dependencies (mako, pyyaml) ..." $'\n'
 	pip install mako pyyaml &> /dev/null
+
+	echo "Downloading latest glslangValidator for Mesa main..."
+    mkdir -p "$workdir/bin"
+    curl -L https://github.com/KhronosGroup/glslang/releases/download/master-tot/glslang-master-linux-x64-Release.zip -o glslang.zip &> /dev/null
+    unzip -oj glslang.zip bin/glslangValidator -d "$workdir/bin" &> /dev/null
+    chmod +x "$workdir/bin/glslangValidator"
+    rm glslang.zip
+    
+    export PATH="$workdir/bin:$PATH"
+    echo -e "$green - glslangValidator updated to $(glslangValidator -v | head -n 1) $nocolor"
 }
 
 prepare_workdir(){
@@ -131,7 +141,6 @@ EOF
 		-Dvulkan-beta=true \
 		-Dfreedreno-kmds=kgsl \
 		-Db_lto=false \
-		-Dglslang=disabled \
 		-Degl=disabled
 
 	echo "Compiling build files ..." $'\n'
