@@ -45,6 +45,7 @@ jobs:
           turnip_workdir/turnip_${{ steps.versions3.outputs.tag }}.zip
       
     - name: Release "turnip"
+      if: github.event_name == 'schedule' || github.event.inputs.release == 'true'
       uses: softprops/action-gh-release@v1
       with:
         body: ${{ steps.versions1.outputs.description }} 
