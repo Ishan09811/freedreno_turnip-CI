@@ -102,7 +102,7 @@ prepare_workdir(){
 
 build_lib_for_android(){
 	echo "Creating meson cross file ..." $'\n'
-	ndk="$workdir/$ndkver/toolchains/llvm/prebuilt/linux-x86_64/bin"
+	ndk=$(find "$workdir" -maxdepth 1 -type d -name "android-ndk-*" | head -n 1)
 
 	cat <<EOF >"android-aarch64"
 [binaries]
