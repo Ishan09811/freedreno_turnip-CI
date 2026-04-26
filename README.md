@@ -1,7 +1,7 @@
 This is a bash script to build freedreno/turnip for android as an adrenotool package.
 
 ### Scheduled Releases
-- Automated releases at 06:00 UTC on the 1st and 15th of each month.
+- Automated releases every sunday.
   
 ### To Build Locally
 - Obtain the script [turnip_builder.sh](https://raw.githubusercontent.com/Weab-chan/freedreno_turnip-CI/main/turnip_builder.sh) on your linux environment. (visit the link and use ```CTRL + S``` keys)
