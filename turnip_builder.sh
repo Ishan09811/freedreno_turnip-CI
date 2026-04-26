@@ -108,7 +108,7 @@ build_lib_for_android(){
 [binaries]
 ar = '$ndk/llvm-ar'
 c = ['ccache', '$ndk/aarch64-linux-android$sdkver-clang']
-cpp = ['ccache', '$ndk/aarch64-linux-android$sdkver-clang++', '-fno-exceptions', '-fno-unwind-tables', '-fno-asynchronous-unwind-tables', '-static-libstdc++']
+cpp = ['ccache', '$ndk/aarch64-linux-android$sdkver-clang++', '-fno-exceptions', '-fno-unwind-tables', '-fno-asynchronous-unwind-tables', '--start-no-unused-arguments', '-static-libstdc++', '--end-no-unused-arguments']
 c_ld = 'lld'
 cpp_ld = 'lld'
 strip = '$ndk/aarch64-linux-android-strip'
@@ -121,12 +121,11 @@ endian = 'little'
 EOF
 
 	echo "Generating build files ..." $'\n'
-	meson build-android-aarch64 --cross-file "$workdir"/mesa/android-aarch64 -Dbuildtype=release -Dplatforms=android -Dplatform-sdk-version=$sdkver -Dandroid-stub=true -Dgallium-drivers= -Dvulkan-drivers=freedreno -Dvulkan-beta=true -Dfreedreno-kmds=kgsl -Db_lto=true &> "$workdir"/meson_log
+	meson setup build-android-aarch64 --cross-file "$workdir"/mesa/android-aarch64 -Dbuildtype=release -Dplatforms=android -Dplatform-sdk-version=$sdkver -Dandroid-stub=true -Dgallium-drivers= -Dvulkan-drivers=freedreno -Dvulkan-beta=true -Dfreedreno-kmds=kgsl -Db_lto=true -Degl=disabled &> "$workdir"/meson_log
 
 	echo "Compiling build files ..." $'\n'
 	ninja -C build-android-aarch64 &> "$workdir"/ninja_log
 }
-
 
 
 port_lib_for_magisk(){
