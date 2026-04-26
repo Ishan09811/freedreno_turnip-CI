@@ -17,8 +17,8 @@ vulkan_version=""
 clear
 
 run_all(){
+    check_deps
 	prepare_workdir
-	check_deps
 	build_lib_for_android
 	port_lib_for_magisk
 }
@@ -46,10 +46,10 @@ check_deps(){
 	echo "Installing python dependencies (mako, pyyaml) ..." $'\n'
 	pip install mako pyyaml &> /dev/null
 
-	echo "Downloading modern glslangValidator for Mesa main..."
+	echo "Downloading latest glslangValidator for Mesa main..."
     mkdir -p "$workdir/bin"
     cd "$workdir"
-    curl -L https://github.com/KhronosGroup/glslang/releases/download/master-tot/glslang-master-linux-x64-Release.zip -o glslang.zip &> /dev/null
+    curl -L https://github.com/KhronosGroup/glslang/releases/download/main-tot/glslang-main-linux-Release.zip -o glslang.zip &> /dev/null
     
     unzip -o glslang.zip -d glslang_temp &> /dev/null
     find glslang_temp -name "glslangValidator" -type f -exec cp {} "$workdir/bin/" \;
@@ -64,9 +64,9 @@ check_deps(){
 }
 
 prepare_workdir(){
-	echo "Creating and entering to work directory ..." $'\n'
+    echo "Creating and entering to work directory ..." $'\n'
 	mkdir -p "$workdir" && cd "$workdir"
-
+	
 	if [ -n "$ANDROID_NDK_LATEST_HOME" ] && [ -d "$ANDROID_NDK_LATEST_HOME" ]; then
 		echo -e "$green- Using pre-installed NDK at: $ANDROID_NDK_LATEST_HOME $nocolor"
 		export NDK_PATH="$ANDROID_NDK_LATEST_HOME"
