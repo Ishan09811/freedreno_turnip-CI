@@ -140,6 +140,7 @@ EOF
 	echo "Generating build files ..." $'\n'
 	meson setup build-android-aarch64 \
 		--cross-file "$(pwd)/android-aarch64" \
+		--wrap-mode=nodownload \
 		-Dbuildtype=release \
 		-Dplatforms=android \
 		-Dplatform-sdk-version=$sdkver \
