@@ -154,7 +154,7 @@ EOF
 		-Dtools=
 
 	echo "Compiling build files ..." $'\n'
-	ninja -C build-android-aarch64
+	ninja -C build-android-aarch64 src/freedreno/vulkan/libvulkan_freedreno.so
 }
 
 port_lib_for_magisk(){
@@ -162,10 +162,12 @@ port_lib_for_magisk(){
     
     compiled_lib=$(find "$workdir/mesa/build-android-aarch64" -name "libvulkan_freedreno.so" -type f | head -n 1)
     
-    if [ -z "$compiled_lib" ] || [ ! -f "$compiled_lib" ]; then
-        echo -e "$red- Build failed! libvulkan_freedreno.so not found in build directory. $nocolor"
-        # Debug: List the contents of the vulkan output folder to see what WAS built
-        ls -R "$workdir/mesa/build-android-aarch64/src/freedreno/vulkan/"
+    if [ -z "$compiled_lib" ]; then
+        echo -e "$red- Build failed! libvulkan_freedreno.so was never linked. $nocolor"
+        # Check if ninja actually tried to build it
+        if [ ! -f "$workdir/mesa/build-android-aarch64/build.ninja" ]; then
+             echo "build.ninja is missing! Meson setup failed."
+        fi
         exit 1
     fi
 
