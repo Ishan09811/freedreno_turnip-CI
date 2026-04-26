@@ -91,11 +91,11 @@ prepare_workdir(){
 	git clone --depth=1 "$mesasrc" &> /dev/null
 	cd mesa
 
-	echo "Updating internal Vulkan headers to latest Khronos spec..."
-	git clone --depth=1 https://github.com/KhronosGroup/Vulkan-Headers.git vk_headers_temp &> /dev/null
-	cp -rf vk_headers_temp/include/vulkan/* include/vulkan/
-	rm -rf vk_headers_temp
-	echo -e "$green- Vulkan headers updated successfully. $nocolor"
+	#echo "Updating internal Vulkan headers to latest Khronos spec..."
+	#git clone --depth=1 https://github.com/KhronosGroup/Vulkan-Headers.git vk_headers_temp &> /dev/null
+	#cp -rf vk_headers_temp/include/vulkan/* include/vulkan/
+	#rm -rf vk_headers_temp
+	#echo -e "$green- Vulkan headers updated successfully. $nocolor"
 	
 	commit_short=$(git rev-parse --short HEAD)
 	commit=$(git rev-parse HEAD)
