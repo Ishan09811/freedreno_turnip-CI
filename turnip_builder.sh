@@ -10,16 +10,12 @@ ndkver="android-ndk-r29c"
 sdkver="35"
 mesasrc="https://gitlab.freedesktop.org/mesa/mesa.git"
 
-
-patches=()
 commit=""
 commit_short=""
 mesa_version=""
 vulkan_version=""
 clear
 
-# there are 4 functions here, simply comment to disable.
-# you can insert your own function and make a pull request.
 run_all(){
 	check_deps
 	prepare_workdir
@@ -27,9 +23,8 @@ run_all(){
 	port_lib_for_magisk
 }
 
-
 check_deps(){
-	sudo apt remove meson
+	sudo apt remove meson -y &>/dev/null || true
 	pip install meson
 
 	echo "Checking system for required Dependencies ..."
@@ -44,26 +39,29 @@ check_deps(){
 			fi;
 		done
 
-		if [ "$deps_missing" == "1" ]
-			then echo "Please install missing dependencies" && exit 1
+		if [ "$deps_missing" == "1" ]; then 
+			echo "Please install missing dependencies" && exit 1
 		fi
 
-	echo "Installing python Mako dependency (if missing) ..." $'\n'
-	pip install mako &> /dev/null
+	echo "Installing python dependencies (mako, pyyaml) ..." $'\n'
+	pip install mako pyyaml &> /dev/null
 }
-
-
 
 prepare_workdir(){
 	echo "Creating and entering to work directory ..." $'\n'
-	mkdir -p "$workdir" && cd "$_"
+	mkdir -p "$workdir" && cd "$workdir"
 
-	if [ ! -n "$(ls -d android-ndk*)" ]; then
-		echo "Downloading android-ndk from google server (~640 MB) ..." $'\n'
-		curl https://dl.google.com/android/repository/"$ndkver"-linux.zip --output "$ndkver"-linux.zip &> /dev/null
-		###
-		echo "Exracting android-ndk to a folder ..." $'\n'
-		unzip "$ndkver"-linux.zip  &> /dev/null
+	if [ -n "$ANDROID_NDK_LATEST_HOME" ] && [ -d "$ANDROID_NDK_LATEST_HOME" ]; then
+		echo -e "$green- Using pre-installed NDK at: $ANDROID_NDK_LATEST_HOME $nocolor"
+		export NDK_PATH="$ANDROID_NDK_LATEST_HOME"
+	else
+		if [ ! -d "$ndkver" ]; then
+			echo "Downloading $ndkver from google server ..." $'\n'
+			curl -L https://dl.google.com/android/repository/"$ndkver"-linux.zip --output "$ndkver"-linux.zip &> /dev/null
+			echo "Extracting $ndkver to a folder ..." $'\n'
+			unzip "$ndkver"-linux.zip  &> /dev/null
+		fi
+		export NDK_PATH="$workdir/$ndkver"
 	fi
 
 	if [ -d mesa ]; then
@@ -71,48 +69,49 @@ prepare_workdir(){
 		rm -rf mesa
 	fi
 	
-	echo "Cloning mesa ..." $'\n'
-	git clone --depth=1 "$mesasrc"  &> /dev/null
-
+	echo "Cloning latest mesa main branch ..." $'\n'
+	git clone --depth=1 "$mesasrc" &> /dev/null
 	cd mesa
 
-	for patch in ${patches[@]}; do
-		echo "Applying patch $patch"
-		patch_source="$(echo $patch | cut -d ";" -f 1 | xargs)"
-		patch_file="${patch_source#*\/}"
-		patch_args=$(echo $patch | cut -d ";" -f 2 | xargs)
-		curl https://gitlab.freedesktop.org/mesa/mesa/-/"$patch_source".patch --output "$patch_file".patch  &> /dev/null
+	echo "Updating internal Vulkan headers to latest Khronos spec..."
+	git clone --depth=1 https://github.com/KhronosGroup/Vulkan-Headers.git vk_headers_temp &> /dev/null
+	cp -rf vk_headers_temp/include/vulkan/* include/vulkan/
+	rm -rf vk_headers_temp
+	echo -e "$green- Vulkan headers updated successfully. $nocolor"
 	
-		git apply $patch_args "$patch_file".patch
-	done
-
-
-
 	commit_short=$(git rev-parse --short HEAD)
 	commit=$(git rev-parse HEAD)
 	mesa_version=$(cat VERSION | xargs)
-	version=$(awk -F'COMPLETE VK_MAKE_API_VERSION(|)' '{print $2}' <<< $(cat include/vulkan/vulkan_core.h) | xargs)
-	major=$(echo $version | cut -d "," -f 2 | xargs)
-	minor=$(echo $version | cut -d "," -f 3 | xargs)
-	patch=$(awk -F'VK_HEADER_VERSION |\n#define' '{print $2}' <<< $(cat include/vulkan/vulkan_core.h) | xargs)
+	
+	# Extract version from updated headers
+	v_header="include/vulkan/vulkan_core.h"
+	major=$(grep "#define VK_API_VERSION_MAJOR" $v_header | awk '{print $3}')
+	minor=$(grep "#define VK_API_VERSION_MINOR" $v_header | awk '{print $3}')
+	patch=$(grep "#define VK_HEADER_VERSION " $v_header | head -n 1 | awk '{print $3}')
 	vulkan_version="$major.$minor.$patch"
 }
 
-
-
 build_lib_for_android(){
 	echo "Creating meson cross file ..." $'\n'
-	ndk="$ANDROID_NDK_LATEST_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin"
+	ndk_bin="$NDK_PATH/toolchains/llvm/prebuilt/linux-x86_64/bin"
+	ndk_sysroot="$NDK_PATH/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
 
 	cat <<EOF >"android-aarch64"
 [binaries]
-ar = '$ndk/llvm-ar'
-c = ['ccache', '$ndk/aarch64-linux-android$sdkver-clang']
-cpp = ['ccache', '$ndk/aarch64-linux-android$sdkver-clang++', '-fno-exceptions', '-fno-unwind-tables', '-fno-asynchronous-unwind-tables', '--start-no-unused-arguments', '-static-libstdc++', '--end-no-unused-arguments']
-c_ld = 'lld'
-cpp_ld = 'lld'
-strip = '$ndk/aarch64-linux-android-strip'
-pkgconfig = ['env', 'PKG_CONFIG_LIBDIR=NDKDIR/pkgconfig', '/usr/bin/pkg-config']
+ar = '$ndk_bin/llvm-ar'
+c = ['$ndk_bin/aarch64-linux-android$sdkver-clang']
+cpp = ['$ndk_bin/aarch64-linux-android$sdkver-clang++', '-fno-exceptions', '-fno-unwind-tables', '-fno-asynchronous-unwind-tables', '-static-libstdc++']
+strip = '$ndk_bin/llvm-strip'
+pkgconfig = '/usr/bin/pkg-config'
+
+[built-in options]
+c_link_args = ['-fuse-ld=lld']
+cpp_link_args = ['-fuse-ld=lld']
+
+[properties]
+needs_exe_wrapper = true
+sys_root = '$ndk_sysroot'
+
 [host_machine]
 system = 'android'
 cpu_family = 'aarch64'
@@ -121,27 +120,40 @@ endian = 'little'
 EOF
 
 	echo "Generating build files ..." $'\n'
-	meson setup build-android-aarch64 --cross-file "$workdir"/mesa/android-aarch64 -Dbuildtype=release -Dplatforms=android -Dplatform-sdk-version=$sdkver -Dandroid-stub=true -Dgallium-drivers= -Dvulkan-drivers=freedreno -Dvulkan-beta=true -Dfreedreno-kmds=kgsl -Db_lto=true -Degl=disabled &> "$workdir"/meson_log
+	meson setup build-android-aarch64 \
+		--cross-file "$(pwd)/android-aarch64" \
+		-Dbuildtype=release \
+		-Dplatforms=android \
+		-Dplatform-sdk-version=$sdkver \
+		-Dandroid-stub=true \
+		-Dgallium-drivers= \
+		-Dvulkan-drivers=freedreno \
+		-Dvulkan-beta=true \
+		-Dfreedreno-kmds=kgsl \
+		-Db_lto=true \
+		-Degl=disabled
 
 	echo "Compiling build files ..." $'\n'
-	ninja -C build-android-aarch64 &> "$workdir"/ninja_log
+	ninja -C build-android-aarch64
 }
 
-
 port_lib_for_magisk(){
+	echo "Checking if compilation was successful..." $'\n'
+	compiled_lib="$workdir/mesa/build-android-aarch64/src/freedreno/vulkan/libvulkan_freedreno.so"
+	
+	if [ ! -f "$compiled_lib" ]; then
+		echo -e "$red- Build failed! libvulkan_freedreno.so not found. Check the ninja output above. $nocolor"
+		exit 1
+	fi
+
 	echo "Using patchelf to match soname ..."  $'\n'
-	cp "$workdir"/mesa/build-android-aarch64/src/freedreno/vulkan/libvulkan_freedreno.so "$workdir"
+	cp "$compiled_lib" "$workdir"
 	cd "$workdir"
 	patchelf --set-soname vulkan.adreno.so libvulkan_freedreno.so
 	mv libvulkan_freedreno.so vulkan.ad07XX.so
 
-	if ! [ -a vulkan.ad07XX.so ]; then
-		echo -e "$red Build failed! $nocolor" && exit 1
-	fi
-
-	mkdir -p "$magiskdir" && cd "$_"
-
-        date=$(date +'%b %d, %Y')
+	mkdir -p "$magiskdir" && cd "$magiskdir"
+	date=$(date +'%b %d, %Y')
 
 	cat <<EOF >"meta.json"
 {
@@ -157,10 +169,10 @@ port_lib_for_magisk(){
 }
 EOF
 
-	echo "Copy necessary files from work directory ..." $'\n'
+	echo "Copying necessary files from work directory ..." $'\n'
 	cp "$workdir"/vulkan.ad07XX.so "$magiskdir"
 
-	echo "Packing files in to adrenotool package ..." $'\n'
+	echo "Packing files into adrenotool package ..." $'\n'
 	zip -r "$workdir"/turnip_"$mesa_version"_"$commit_short".zip ./*
 
 	cd "$workdir"
@@ -168,9 +180,11 @@ EOF
 	echo "Turnip Driver - $mesa_version - $commit_short" > release
 	echo "$mesa_version"_"$commit_short" > tag
 
-	if ! [ -a "$workdir"/turnip_"$mesa_version"_"$commit_short".zip ];
-		then echo -e "$red-Packing failed!$nocolor" && exit 1
-		else echo -e "$green-All done, you can take your zip from here;$nocolor" && echo "$workdir"/turnip.zip
+	if [ ! -f "$workdir"/turnip_"$mesa_version"_"$commit_short".zip ]; then 
+		echo -e "$red-Packing failed!$nocolor" && exit 1
+	else 
+		echo -e "$green-All done, you can take your zip from here:$nocolor" 
+		echo "$workdir"/turnip_"$mesa_version"_"$commit_short".zip
 	fi
 }
 
