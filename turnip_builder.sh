@@ -131,6 +131,7 @@ EOF
 		-Dvulkan-beta=true \
 		-Dfreedreno-kmds=kgsl \
 		-Db_lto=false \
+		-Dglslang=disabled \
 		-Degl=disabled
 
 	echo "Compiling build files ..." $'\n'
