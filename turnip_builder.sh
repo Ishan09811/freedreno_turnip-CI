@@ -121,7 +121,7 @@ build_lib_for_android(){
 [binaries]
 ar = '$ndk_bin/llvm-ar'
 c = ['$ndk_bin/aarch64-linux-android$sdkver-clang']
-cpp = ['$ndk_bin/aarch64-linux-android$sdkver-clang++', '-fno-exceptions', '-fno-unwind-tables', '-fno-asynchronous-unwind-tables', '-static-libstdc++']
+cpp = ['$ndk_bin/aarch64-linux-android$sdkver-clang++', '-fno-exceptions', '-fno-unwind-tables', '-fno-asynchronous-unwind-tables', '-static-libstdc++', '-Wno-narrowing', '-Wno-c99-designator']
 strip = '$ndk_bin/llvm-strip'
 pkgconfig = ['env', 'PKG_CONFIG_LIBDIR=NDKDIR/pkgconfig', '/usr/bin/pkg-config']
 
