@@ -130,7 +130,7 @@ EOF
 		-Dvulkan-drivers=freedreno \
 		-Dvulkan-beta=true \
 		-Dfreedreno-kmds=kgsl \
-		-Db_lto=true \
+		-Db_lto=false \
 		-Degl=disabled
 
 	echo "Compiling build files ..." $'\n'
