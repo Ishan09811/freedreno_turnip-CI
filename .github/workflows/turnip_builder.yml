@@ -10,7 +10,7 @@ on:
         type: boolean
         
   schedule:
-  - cron: "20 5 * * 0"
+  - cron: "20 5 1 * *"
 
 jobs:
   start_building_turnip:
